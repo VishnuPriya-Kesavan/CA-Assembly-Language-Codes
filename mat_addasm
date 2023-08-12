@@ -1,0 +1,35 @@
+# Matrix addition in MIPS assembly language
+.data
+matrixA: .word 1, 2, 3, 4, 5, 6, 7, 8, 9  # matrix A
+matrixB: .word 9, 8, 7, 6, 5, 4, 3, 2, 1  # matrix B
+matrixC: .space 36                      # matrix C (initialized to 0)
+# N is the size of the matrices
+N: .word 3
+.text
+main:
+    lw $t0, N                                # Load N into a register
+    li $t1, 0                                # Initialize the loop counter i
+loop:
+    bge $t1, $t0, exit                       # Check if i < N, if not, exit loop
+    li $t2, 0                                 # Initialize the loop counter j
+innerloop:
+    bge $t2, $t0, exitinner              # Check if j < N, if not, exit inner loop
+    # Calculate the index of the current element in matrices A, B, and C
+    mul $t3, $t1, $t0           # t3 = i * N
+    add $t3, $t3, $t2           # t3 = i * N + j
+    sll $t3, $t3, 2             # t3 = (i * N + j) * 4 (to convert to byte offset)
+    # Load the current element from matrices A and B
+    lw $t4, matrixA($t3)
+    lw $t5, matrixB($t3)
+    # Add the current elements from matrices A and B
+    add $t6, $t4, $t5
+    # Store the result in matrix C
+    sw $t6, matrixC($t3)               # Increment the inner loop counter j
+    addi $t2, $t2, 1
+    j innerloop
+exitinner:
+    addi $t1, $t1, 1        # Increment the outer loop counter i
+    j loop
+exit:
+    li $v0, 10
+    syscall
